@@ -196,7 +196,9 @@ document.getElementById('pdf').onclick=()=>{
 async function postShared(payload,redraw=true){
  document.getElementById('sharedStatus').textContent='⏳ Guardando...';
  try{
-  const data=await jsonp(payload);
+  console.log('DATOS ENVIADOS A SHEETS:', payload);
+const data=await jsonp(payload);
+console.log('RESPUESTA DE SHEETS:', data);
   if(data && data.ok===false) throw new Error(data.error||'Error del servidor');
   if(Array.isArray(data)) sharedRows=data; else if(Array.isArray(data?.datos)) sharedRows=data.datos;
   document.getElementById('sharedStatus').textContent='☁️ Guardado correctamente';
