@@ -83,17 +83,55 @@ async function openShared(){section='faltas';only=false;sharedFilter='TODAS';doc
  document.getElementById('generate').onclick=generateShared;
  await loadShared();
 }
-function jsonp(params={}){
- return new Promise((resolve,reject)=>{
-  const cb='uemip_cb_'+Date.now()+'_'+Math.floor(Math.random()*100000);
-  const script=document.createElement('script');
-  const qs=new URLSearchParams({...params,callback:cb,_ts:Date.now()});
-  let done=false,timer;
-  const finish=(ok,data)=>{if(done)return;done=true;clearTimeout(timer);try{delete window[cb]}catch(_){}script.remove();ok?resolve(data):reject(new Error('Tiempo de espera'))};
-  timer=setTimeout(()=>finish(false),10000);
-  window[cb]=(data)=>finish(true,data); script.onerror=()=>finish(false);
-  script.src=API_URL+'?'+qs.toString(); document.body.appendChild(script);
- });
+function jsonp(params = {}) {
+  return new Promise((resolve, reject) => {
+    const cb = 'uemip_cb_' + Date.now() + '_' +
+      Math.floor(Math.random() * 100000);
+
+    const script = document.createElement('script');
+    const qs = new URLSearchParams({
+      ...params,
+      callback: cb,
+      _ts: Date.now()
+    });
+
+    let done = false;
+
+    const finish = (ok, data) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+
+      try {
+        delete window[cb];
+      } catch (_) {
+        window[cb] = undefined;
+      }
+
+      script.remove();
+
+      if (ok) {
+        resolve(data);
+      } else {
+        reject(new Error('No se recibió una respuesta válida del servidor.'));
+      }
+    };
+
+    const timer = setTimeout(() => {
+      finish(false);
+    }, 20000);
+
+    window[cb] = (data) => {
+      finish(true, data);
+    };
+
+    script.onerror = () => {
+      finish(false);
+    };
+
+    script.src = API_URL + '?' + qs.toString();
+    document.body.appendChild(script);
+  });
 }
 async function loadShared(){
  try{
